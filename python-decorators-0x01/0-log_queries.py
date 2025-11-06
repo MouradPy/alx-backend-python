@@ -1,21 +1,22 @@
+#!/usr/bin/python3
 import sqlite3
 import functools
 
+# Decorator to log SQL queries
 def log_queries(func):
-    """
-    Decorator that logs SQL queries before executing the decorated function.
-    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # Extract query from arguments
-        query = kwargs.get('query') or (args[0] if args else None)
-        
-        # Log the query
-        print(f"Executing query: {query}")
-        
-        # Call the original function
-        return func(*args, **kwargs)
+        # Try to extract the SQL query argument (for readability)
+        query = kwargs.get('query') if 'query' in kwargs else args[0] if args else None
+        if query:
+            print(f"[LOG] Executing SQL query: {query}")
+        else:
+            print("[LOG] Executing SQL query (no query string found).")
+        # Execute the original function
+        result = func(*args, **kwargs)
+        return result
     return wrapper
+
 
 @log_queries
 def fetch_all_users(query):
@@ -26,17 +27,8 @@ def fetch_all_users(query):
     conn.close()
     return results
 
-def main():
-    """Main function to demonstrate the decorator functionality."""
-    print("Testing log_queries decorator...")
-    
-    # Fetch users while logging the query
-    users = fetch_all_users(query="SELECT * FROM users")
-    print(f"Retrieved {len(users)} users")
-    
-    # Test with a different query
-    users_count = fetch_all_users(query="SELECT COUNT(*) FROM users")
-    print(f"Users count: {users_count[0][0]}")
 
+# Fetch users while logging the query
 if __name__ == "__main__":
-    main()
+    users = fetch_all_users(query="SELECT * FROM users")
+    print(users)

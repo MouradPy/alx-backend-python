@@ -6,22 +6,24 @@ Concurrent Asynchronous Database Queries
 import asyncio
 import aiosqlite
 
+DB_PATH = "async_users.db"
 
-async def async_fetch_users(db_path):
+
+async def async_fetch_users():
     """
     Fetch all users from the database
     """
-    async with aiosqlite.connect(db_path) as db:
+    async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT * FROM users") as cursor:
             results = await cursor.fetchall()
             return results
 
 
-async def async_fetch_older_users(db_path):
+async def async_fetch_older_users():
     """
     Fetch users older than 40 from the database
     """
-    async with aiosqlite.connect(db_path) as db:
+    async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT * FROM users WHERE age > ?", (40,)) as cursor:
             results = await cursor.fetchall()
             return results
@@ -31,25 +33,23 @@ async def fetch_concurrently():
     """
     Execute both queries concurrently using asyncio.gather
     """
-    db_path = "async_users.db"
-    
     # Create sample database first
-    await create_sample_database(db_path)
+    await create_sample_database()
     
     # Use asyncio.gather to execute both queries concurrently
     results = await asyncio.gather(
-        async_fetch_users(db_path),
-        async_fetch_older_users(db_path)
+        async_fetch_users(),
+        async_fetch_older_users()
     )
     
     return results
 
 
-async def create_sample_database(db_path):
+async def create_sample_database():
     """
     Create a sample database with users table and data
     """
-    async with aiosqlite.connect(db_path) as db:
+    async with aiosqlite.connect(DB_PATH) as db:
         await db.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

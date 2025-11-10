@@ -3,6 +3,7 @@ import sqlite3
 import functools
 import typing
 import re
+from datetime import datetime  # Add this import
 
 SQL_KEYWORDS = ("SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "ALTER", "WITH")
 
@@ -63,4 +64,3 @@ if __name__ == "__main__":
     # Example run (only runs when executed directly)
     users = fetch_all_users(query="SELECT * FROM users")
     print(users)
-

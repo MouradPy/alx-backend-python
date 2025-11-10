@@ -7,7 +7,7 @@ import asyncio
 import aiosqlite
 
 
-async def async_fetch_users(db_path):
+async def asyncfetchusers(db_path):
     """
     Fetch all users from the database
     """
@@ -17,7 +17,7 @@ async def async_fetch_users(db_path):
             return results
 
 
-async def async_fetch_older_users(db_path):
+async def asyncfetcholder_users(db_path):
     """
     Fetch users older than 40 from the database
     """
@@ -25,20 +25,6 @@ async def async_fetch_older_users(db_path):
         async with db.execute("SELECT * FROM users WHERE age > ?", (40,)) as cursor:
             results = await cursor.fetchall()
             return results
-
-
-async def asyncfetchusers(db_path):
-    """
-    Alias function to match both requirements
-    """
-    return await async_fetch_users(db_path)
-
-
-async def asyncfetcholder_users(db_path):
-    """
-    Alias function to match both requirements  
-    """
-    return await async_fetch_older_users(db_path)
 
 
 async def fetch_concurrently():
@@ -51,10 +37,9 @@ async def fetch_concurrently():
     await create_sample_database(db_path)
     
     # Use asyncio.gather to execute both queries concurrently
-    # Using the function names that the checks are looking for
     results = await asyncio.gather(
-        async_fetch_users(db_path),
-        async_fetch_older_users(db_path)
+        asyncfetchusers(db_path),
+        asyncfetcholder_users(db_path)
     )
     
     return results
@@ -95,5 +80,4 @@ async def create_sample_database(db_path):
 
 
 if __name__ == "__main__":
-    # Use asyncio.run() to run the concurrent fetch
     asyncio.run(fetch_concurrently())

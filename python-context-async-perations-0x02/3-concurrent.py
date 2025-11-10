@@ -32,16 +32,16 @@ async def fetch_concurrently():
     Execute both queries concurrently using asyncio.gather
     """
     db_path = "async_users.db"
-
+    
     # Create sample database first
     await create_sample_database(db_path)
-
-    # Run both queries concurrently
+    
+    # Use asyncio.gather to execute both queries concurrently
     results = await asyncio.gather(
         async_fetch_users(db_path),
         async_fetch_older_users(db_path)
     )
-
+    
     return results
 
 
@@ -58,9 +58,9 @@ async def create_sample_database(db_path):
                 age INTEGER
             )
         ''')
-
+        
         await db.execute("DELETE FROM users")
-
+        
         sample_users = [
             ('Alice Johnson', 'alice@example.com', 22),
             ('Bob Smith', 'bob@example.com', 28),
@@ -70,14 +70,15 @@ async def create_sample_database(db_path):
             ('Frank Ocean', 'frank@example.com', 45),
             ('Grace Hopper', 'grace@example.com', 48)
         ]
-
+        
         await db.executemany(
             "INSERT INTO users (name, email, age) VALUES (?, ?, ?)",
             sample_users
         )
-
+        
         await db.commit()
 
 
 if __name__ == "__main__":
+    # Use asyncio.run() to run the concurrent fetch
     asyncio.run(fetch_concurrently())

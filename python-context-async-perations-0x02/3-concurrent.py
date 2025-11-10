@@ -49,7 +49,7 @@ async def create_sample_database(db_path):
         print(f"Error creating sample database: {e}")
 
 
-async def async_fetch_users(db_path):
+async def asyncfetchusers(db_path):
     """
     Fetch all users from the database
     
@@ -66,11 +66,11 @@ async def async_fetch_users(db_path):
                 print(f"Fetched {len(results)} total users")
                 return results
     except Exception as e:
-        print(f"Error in async_fetch_users: {e}")
+        print(f"Error in asyncfetchusers: {e}")
         return []
 
 
-async def async_fetch_older_users(db_path):
+async def asyncfetcholder_users(db_path):
     """
     Fetch users older than 40 from the database
     
@@ -89,7 +89,7 @@ async def async_fetch_older_users(db_path):
                 print(f"Fetched {len(results)} users older than 40")
                 return results
     except Exception as e:
-        print(f"Error in async_fetch_older_users: {e}")
+        print(f"Error in asyncfetcholder_users: {e}")
         return []
 
 
@@ -106,8 +106,8 @@ async def fetch_concurrently():
     
     # Execute both queries concurrently
     all_users, older_users = await asyncio.gather(
-        async_fetch_users(db_path),
-        async_fetch_older_users(db_path)
+        asyncfetchusers(db_path),
+        asyncfetcholder_users(db_path)
     )
     
     print("\n=== Query Results ===")
@@ -141,8 +141,8 @@ async def benchmark_concurrent_vs_sequential():
     print("Starting sequential execution...")
     start_time = asyncio.get_event_loop().time()
     
-    users_seq = await async_fetch_users(db_path)
-    older_seq = await async_fetch_older_users(db_path)
+    users_seq = await asyncfetchusers(db_path)
+    older_seq = await asyncfetcholder_users(db_path)
     
     sequential_time = asyncio.get_event_loop().time() - start_time
     print(f"Sequential execution time: {sequential_time:.4f} seconds")
@@ -152,8 +152,8 @@ async def benchmark_concurrent_vs_sequential():
     start_time = asyncio.get_event_loop().time()
     
     users_conc, older_conc = await asyncio.gather(
-        async_fetch_users(db_path),
-        async_fetch_older_users(db_path)
+        asyncfetchusers(db_path),
+        asyncfetcholder_users(db_path)
     )
     
     concurrent_time = asyncio.get_event_loop().time() - start_time

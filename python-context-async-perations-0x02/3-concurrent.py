@@ -7,7 +7,7 @@ import asyncio
 import aiosqlite
 
 
-async def asyncfetchusers(db_path):
+async def async_fetch_users(db_path):
     """
     Fetch all users from the database
     """
@@ -17,7 +17,7 @@ async def asyncfetchusers(db_path):
             return results
 
 
-async def asyncfetcholder_users(db_path):
+async def async_fetch_older_users(db_path):
     """
     Fetch users older than 40 from the database
     """
@@ -32,16 +32,16 @@ async def fetch_concurrently():
     Execute both queries concurrently using asyncio.gather
     """
     db_path = "async_users.db"
-    
+
     # Create sample database first
     await create_sample_database(db_path)
-    
-    # Use asyncio.gather to execute both queries concurrently
+
+    # Run both queries concurrently
     results = await asyncio.gather(
-        asyncfetchusers(db_path),
-        asyncfetcholder_users(db_path)
+        async_fetch_users(db_path),
+        async_fetch_older_users(db_path)
     )
-    
+
     return results
 
 
@@ -58,9 +58,9 @@ async def create_sample_database(db_path):
                 age INTEGER
             )
         ''')
-        
+
         await db.execute("DELETE FROM users")
-        
+
         sample_users = [
             ('Alice Johnson', 'alice@example.com', 22),
             ('Bob Smith', 'bob@example.com', 28),
@@ -70,12 +70,12 @@ async def create_sample_database(db_path):
             ('Frank Ocean', 'frank@example.com', 45),
             ('Grace Hopper', 'grace@example.com', 48)
         ]
-        
+
         await db.executemany(
             "INSERT INTO users (name, email, age) VALUES (?, ?, ?)",
             sample_users
         )
-        
+
         await db.commit()
 
 

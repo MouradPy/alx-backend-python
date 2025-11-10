@@ -63,3 +63,4 @@ if __name__ == "__main__":
     # Example run (only runs when executed directly)
     users = fetch_all_users(query="SELECT * FROM users")
     print(users)
+

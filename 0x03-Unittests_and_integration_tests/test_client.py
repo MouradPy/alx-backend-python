@@ -119,14 +119,13 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
 
-@parameterized_class([
-    {
-        'org_payload': None,  # Will be set from fixtures
-        'repos_payload': None,  # Will be set from fixtures  
-        'expected_repos': None,  # Will be set from fixtures
-        'apache2_repos': None,  # Will be set from fixtures
-    }
-])
+# Import fixtures to use in parameterized_class
+from fixtures import TEST_PAYLOAD
+
+@parameterized_class(
+    ("org_payload", "repos_payload", "expected_repos", "apache2_repos"),
+    TEST_PAYLOAD
+)
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """
     Integration test class for client.GithubOrgClient
@@ -137,15 +136,6 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         """
         Set up class method to mock requests.get for integration testing
         """
-        # Import fixtures
-        from fixtures import TEST_PAYLOAD
-        
-        # Extract fixtures from TEST_PAYLOAD
-        cls.org_payload = TEST_PAYLOAD[0][0]
-        cls.repos_payload = TEST_PAYLOAD[0][1]
-        cls.expected_repos = TEST_PAYLOAD[0][2]
-        cls.apache2_repos = TEST_PAYLOAD[0][3]
-        
         # Define side_effect function to return appropriate payload based on URL
         def get_side_effect(url):
             """Side effect function to return appropriate payload based on URL"""
@@ -176,6 +166,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     def test_public_repos(self):
         """
         Integration test for GithubOrgClient.public_repos
+        Make sure that the method returns the expected results based on the fixtures.
         """
         # Create client instance
         client = GithubOrgClient("google")
@@ -188,7 +179,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     def test_public_repos_with_license(self):
         """
-        Integration test for GithubOrgClient.public_repos with license filter
+        Integration test for GithubOrgClient.public_repos with license="apache-2.0"
+        Make sure the result matches the expected value from the fixtures.
         """
         # Create client instance
         client = GithubOrgClient("google")

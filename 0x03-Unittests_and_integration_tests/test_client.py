@@ -4,7 +4,7 @@ Unit tests for client module
 """
 import unittest
 from parameterized import parameterized
-from unittest.mock import patch, PropertyMock
+from unittest.mock import patch
 from client import GithubOrgClient
 
 
@@ -30,8 +30,8 @@ class TestGithubOrgClient(unittest.TestCase):
         # Create GithubOrgClient instance
         client = GithubOrgClient(org_name)
 
-        # Call the org method
-        result = client.org()
+        # Call the org property (not method!)
+        result = client.org
 
         # Test that get_json was called once with correct URL
         expected_url = f"https://api.github.com/orgs/{org_name}"

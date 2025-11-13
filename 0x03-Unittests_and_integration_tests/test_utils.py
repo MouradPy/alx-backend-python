@@ -57,7 +57,8 @@ class TestGetJson(unittest.TestCase):
         mock_response.json.return_value = test_payload
 
         # Patch requests.get to return our mock response
-        with patch('utils.requests.get', return_value=mock_response) as mock_get:
+        with patch('utils.requests.get',
+                   return_value=mock_response) as mock_get:
             # Call the function
             result = get_json(test_url)
 
@@ -92,7 +93,8 @@ class TestMemoize(unittest.TestCase):
         test_instance = TestClass()
 
         # Patch a_method to track calls and return 42
-        with patch.object(TestClass, 'a_method', return_value=42) as mock_method:
+        with patch.object(TestClass, 'a_method',
+                          return_value=42) as mock_method:
             # First call to a_property
             result1 = test_instance.a_property
             # Second call to a_property
@@ -102,5 +104,5 @@ class TestMemoize(unittest.TestCase):
             self.assertEqual(result1, 42)
             self.assertEqual(result2, 42)
 
-            # Test that a_method was called only once (due to memoization)
+            # Test that a_method was called only once
             mock_method.assert_called_once()

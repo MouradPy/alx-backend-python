@@ -135,7 +135,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """
-        Set up class method to mock get_json for integration testing
+        Set up class method to mock requests.get for integration testing
         """
         # Import fixtures
         from fixtures import TEST_PAYLOAD
@@ -147,16 +147,23 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.apache2_repos = TEST_PAYLOAD[0][3]
         
         # Define side_effect function to return appropriate payload based on URL
-        def get_json_side_effect(url):
+        def get_side_effect(url):
             """Side effect function to return appropriate payload based on URL"""
+            class MockResponse:
+                def __init__(self, json_data):
+                    self.json_data = json_data
+                
+                def json(self):
+                    return self.json_data
+            
             if url == "https://api.github.com/orgs/google":
-                return cls.org_payload
+                return MockResponse(cls.org_payload)
             elif url == cls.org_payload['repos_url']:
-                return cls.repos_payload
-            return None
+                return MockResponse(cls.repos_payload)
+            return MockResponse({})
 
-        # Start patcher for utils.get_json (not requests.get)
-        cls.get_patcher = patch('client.get_json', side_effect=get_json_side_effect)
+        # Start patcher for requests.get
+        cls.get_patcher = patch('requests.get', side_effect=get_side_effect)
         cls.get_patcher.start()
 
     @classmethod

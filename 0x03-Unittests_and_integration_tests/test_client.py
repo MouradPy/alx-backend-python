@@ -24,7 +24,7 @@ class TestGithubOrgClient(unittest.TestCase):
         and that get_json is called once with the expected argument
         """
         # Set up the mock return value
-        test_payload = {"org": org_name, "repos_url": f"https://example.com/repos/{org_name}"}
+        test_payload = {"login": org_name, "repos_url": f"https://api.github.com/orgs/{org_name}/repos"}
         mock_get_json.return_value = test_payload
 
         # Create GithubOrgClient instance

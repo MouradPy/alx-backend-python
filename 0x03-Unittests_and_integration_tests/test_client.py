@@ -4,7 +4,7 @@ Unit tests for client module
 """
 import unittest
 from parameterized import parameterized
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
 
 
@@ -39,6 +39,30 @@ class TestGithubOrgClient(unittest.TestCase):
 
         # Test that the result matches the mock return value
         self.assertEqual(result, test_payload)
+
+    def test_public_repos_url(self):
+        """
+        Test that GithubOrgClient._public_repos_url returns the expected value
+        """
+        # Test payload with known repos_url
+        test_payload = {
+            "login": "test_org",
+            "repos_url": "https://api.github.com/orgs/test_org/repos"
+        }
+
+        # Patch GithubOrgClient.org property to return our test payload
+        with patch('client.GithubOrgClient.org', 
+                   new_callable=PropertyMock,
+                   return_value=test_payload) as mock_org:
+            # Create GithubOrgClient instance
+            client = GithubOrgClient("test_org")
+            
+            # Call the _public_repos_url property
+            result = client._public_repos_url
+            
+            # Test that the result is the expected repos_url from our payload
+            expected_url = "https://api.github.com/orgs/test_org/repos"
+            self.assertEqual(result, expected_url)
 
 
 if __name__ == '__main__':

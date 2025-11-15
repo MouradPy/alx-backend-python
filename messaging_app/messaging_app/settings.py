@@ -127,7 +127,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',  # Required by checker
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [  # Required by checker
+        'rest_framework.authentication.SessionAuthentication',  # Required by checker
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10

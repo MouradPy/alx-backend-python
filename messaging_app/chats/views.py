@@ -1,7 +1,8 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from .models import User, Conversation, Message
 from .serializers import (
@@ -20,6 +21,10 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ['first_name', 'last_name', 'email']
+    ordering_fields = ['first_name', 'last_name', 'created_at']
+    filterset_fields = ['role']
     
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -41,6 +46,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ['participants__first_name', 'participants__last_name']
+    ordering_fields = ['created_at']
+    filterset_fields = ['participants']
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -50,6 +59,19 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return conversations where the current user is a participant"""
         return Conversation.objects.filter(participants=self.request.user)
+    
+    def list(self, request, *args, **kwargs):
+        """List conversations with filtering"""
+        # Apply additional filtering if needed
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
     def create(self, request, *args, **kwargs):
         """Create a new conversation"""
@@ -77,6 +99,12 @@ class ConversationViewSet(viewsets.ModelViewSet):
         """Get all messages for a specific conversation"""
         conversation = self.get_object()
         messages = conversation.messages.all()
+        
+        # Apply filtering to messages if query parameters are provided
+        message_body_filter = request.query_params.get('message_body', None)
+        if message_body_filter:
+            messages = messages.filter(message_body__icontains=message_body_filter)
+        
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
     
@@ -137,6 +165,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     queryset = Message.objects.all()
     permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ['message_body', 'sender__first_name', 'sender__last_name']
+    ordering_fields = ['sent_at']
+    filterset_fields = ['sender', 'conversation']
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -147,6 +179,24 @@ class MessageViewSet(viewsets.ModelViewSet):
         """Return messages from conversations where the current user is a participant"""
         user_conversations = Conversation.objects.filter(participants=self.request.user)
         return Message.objects.filter(conversation__in=user_conversations)
+    
+    def list(self, request, *args, **kwargs):
+        """List messages with filtering"""
+        # Apply additional filtering if needed
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # Filter by conversation if provided
+        conversation_id = request.query_params.get('conversation', None)
+        if conversation_id:
+            queryset = queryset.filter(conversation__conversation_id=conversation_id)
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
     def create(self, request, *args, **kwargs):
         """Create a new message"""
@@ -166,6 +216,12 @@ class MessageViewSet(viewsets.ModelViewSet):
     def my_messages(self, request):
         """Get all messages sent by the current user"""
         messages = Message.objects.filter(sender=request.user)
+        
+        # Apply filtering
+        message_body_filter = request.query_params.get('message_body', None)
+        if message_body_filter:
+            messages = messages.filter(message_body__icontains=message_body_filter)
+        
         serializer = self.get_serializer(messages, many=True)
         return Response(serializer.data)
     
@@ -190,6 +246,12 @@ class MessageViewSet(viewsets.ModelViewSet):
                 )
             
             messages = conversation.messages.all()
+            
+            # Apply filtering
+            message_body_filter = request.query_params.get('filter', None)
+            if message_body_filter:
+                messages = messages.filter(message_body__icontains=message_body_filter)
+            
             serializer = self.get_serializer(messages, many=True)
             return Response(serializer.data)
         except Conversation.DoesNotExist:

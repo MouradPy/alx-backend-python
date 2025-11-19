@@ -131,7 +131,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # JWT Authentication
-        'rest_framework.authentication.SessionAuthentication',  # Session Authentication for admin
+        'rest_framework.authentication.SessionAuthentication',  # Session Authentication for admin   
+         'rest_framework.authentication.BasicAuthentication',  # ← ADD THIS LINE
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # Required by checker
